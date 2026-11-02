@@ -1,4 +1,4 @@
-import { useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { Expense } from '../../types'
 import { removeCategory, useCategories } from '../../lib/categories'
 import { AddCategoryForm } from './AddCategoryForm'
@@ -24,6 +24,9 @@ export function CategoriesPanel({ expenses, onReassign }: CategoriesPanelProps) 
   const [expanded, setExpanded] = useState(false)
   const [open, setOpen] = useState<OpenEditor | null>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
+  /** After a delete, the category whose Rename button gets focus (null = the toggle). */
+  const focusAfterDelete = useRef<string | null | undefined>(undefined)
   const panelId = useId()
   const counts = useMemo(() => countByCategory(expenses), [expenses])
 
@@ -32,11 +35,22 @@ export function CategoriesPanel({ expenses, onReassign }: CategoriesPanelProps) 
     setExpanded((value) => !value)
   }
 
+  // Keep the keyboard user's place: focus a neighbouring row once the deleted one is gone.
+  useEffect(() => {
+    const target = focusAfterDelete.current
+    if (target === undefined) return
+    focusAfterDelete.current = undefined
+    const button = target === null ? null : listRef.current?.querySelector<HTMLButtonElement>(`[data-rename-for="${CSS.escape(target)}"]`)
+    ;(button ?? toggleRef.current)?.focus()
+  }, [categories])
+
   function handleDelete(id: string, moveTo: string | null) {
+    const index = categories.findIndex((c) => c.id === id)
+    const neighbour = categories[index + 1] ?? categories[index - 1]
+    focusAfterDelete.current = neighbour?.id ?? null
     if (moveTo !== null && moveTo !== id) onReassign(id, moveTo)
     removeCategory(id)
     setOpen(null)
-    toggleRef.current?.focus()
   }
 
   return (
@@ -61,7 +75,7 @@ export function CategoriesPanel({ expenses, onReassign }: CategoriesPanelProps) 
         </p>
       ) : (
         <div id={panelId} className="categories-body">
-          <ul className="cat-rows">
+          <ul ref={listRef} className="cat-rows">
             {categories.map((category) => (
               <CategoryRow
                 key={category.id}

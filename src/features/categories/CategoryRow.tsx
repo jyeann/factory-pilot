@@ -30,6 +30,7 @@ function RenameForm({ category, onDone }: { category: Category; onDone: () => vo
   const id = useId()
 
   useEffect(() => {
+    inputRef.current?.focus()
     inputRef.current?.select()
   }, [])
 
@@ -45,7 +46,7 @@ function RenameForm({ category, onDone }: { category: Category; onDone: () => vo
     onDone()
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLFormElement>) {
     if (event.key === 'Escape') {
       event.preventDefault()
       onDone()
@@ -53,7 +54,7 @@ function RenameForm({ category, onDone }: { category: Category; onDone: () => vo
   }
 
   return (
-    <form className="cat-editor" onSubmit={handleSubmit} noValidate>
+    <form className="cat-editor" onSubmit={handleSubmit} onKeyDown={handleKeyDown} noValidate>
       <div className="field">
         <label htmlFor={`${id}-name`}>Name for {category.label}</label>
         <input
@@ -67,7 +68,6 @@ function RenameForm({ category, onDone }: { category: Category; onDone: () => vo
             setDraft(e.target.value)
             if (error) setError(null)
           }}
-          onKeyDown={handleKeyDown}
         />
       </div>
       {error && (
@@ -107,7 +107,17 @@ function DeleteConfirm({ category, categories, count, onCancel, onConfirm }: {
   }
 
   return (
-    <form className="cat-editor" aria-labelledby={`${id}-note`} onSubmit={handleSubmit}>
+    <form
+      className="cat-editor"
+      aria-labelledby={`${id}-note`}
+      onSubmit={handleSubmit}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault()
+          onCancel()
+        }
+      }}
+    >
       <p id={`${id}-note`} className="cat-delete-note">
         {category.label} has {formatExpenseCount(count).toLowerCase()}. Where should they go?
       </p>
@@ -118,12 +128,6 @@ function DeleteConfirm({ category, categories, count, onCancel, onConfirm }: {
           id={`${id}-target`}
           value={moveTo}
           onChange={(e) => setMoveTo(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              e.preventDefault()
-              onCancel()
-            }
-          }}
         >
           {targets.map((c) => (
             <option key={c.id} value={c.id}>
@@ -181,6 +185,7 @@ export function CategoryRow({ category, categories, count, mode, onModeChange, o
             type="button"
             className="ghost"
             aria-label={`Rename ${label}`}
+            data-rename-for={id}
             aria-expanded={mode === 'rename'}
             aria-controls={mode === 'rename' ? editorId : undefined}
             onClick={() => toggle('rename')}
@@ -225,7 +230,7 @@ export function CategoryRow({ category, categories, count, mode, onModeChange, o
                 if (e.key === 'Escape') close(colourRef.current)
               }}
             >
-              <ColorRadioGroup label={`Colour for ${label}`} value={category.color} onChange={(c) => recolorCategory(id, c)} />
+              <ColorRadioGroup autoFocus label={`Colour for ${label}`} value={category.color} onChange={(c) => recolorCategory(id, c)} />
               <div className="form-actions">
                 <button type="button" className="ghost" onClick={() => close(colourRef.current)}>
                   Done

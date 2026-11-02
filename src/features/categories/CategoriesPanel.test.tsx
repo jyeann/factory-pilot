@@ -88,6 +88,7 @@ describe('CategoriesPanel', () => {
     const renameButton = screen.getByRole('button', { name: 'Rename Food' })
     await user.click(renameButton)
     const input = screen.getByLabelText('Name for Food')
+    expect(input).toHaveFocus()
     await user.clear(input)
     await user.type(input, 'Groceries{Enter}')
 
@@ -116,6 +117,7 @@ describe('CategoriesPanel', () => {
     await user.click(screen.getByRole('button', { name: 'Colour of Food' }))
     const group = screen.getByRole('radiogroup', { name: 'Colour for Food' })
     expect(within(group).queryByRole('radio', { checked: true })).not.toBeInTheDocument()
+    expect(within(group).getByRole('radio', { name: 'Green' })).toHaveFocus()
 
     await user.click(within(group).getByRole('radio', { name: 'Orange' }))
     expect(getCategories().find((c) => c.id === 'food')?.color).toBe('p5')
@@ -135,7 +137,7 @@ describe('CategoriesPanel', () => {
     expect(getCategories().map((c) => c.id)).not.toContain('housing')
     expect(getAllCategories().find((c) => c.id === 'housing')?.archived).toBe(true)
     expect(screen.queryByText('Housing', { selector: '.cat-row-label' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Manage categories' })).toHaveFocus()
+    expect(screen.getByRole('button', { name: 'Rename Entertainment' })).toHaveFocus()
   })
 
   it('asks where expenses go before deleting, defaulting to Other', async () => {
@@ -173,7 +175,7 @@ describe('CategoriesPanel', () => {
     const { user, onReassign } = setup([expense('1', 'food')])
     await openPanel(user)
     await user.click(screen.getByRole('button', { name: 'Delete category Food' }))
-    await user.click(screen.getByRole('button', { name: 'Keep Food' }))
+    await user.keyboard('{Escape}')
 
     expect(screen.queryByLabelText('Move expenses to')).not.toBeInTheDocument()
     expect(onReassign).not.toHaveBeenCalled()
