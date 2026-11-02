@@ -10,30 +10,7 @@ export interface CategoryTotal {
   count: number
 }
 
-const MONTHS_PER_YEAR = 12
-
-function pad2(n: number): string {
-  return String(n).padStart(2, '0')
-}
-
-function parseMonth(month: string): { year: number; monthIndex: number } {
-  const [year, mm] = month.split('-').map(Number)
-  return { year, monthIndex: mm - 1 }
-}
-
-/** The month containing `now`, in local time. */
-export function currentMonth(now: Date = new Date()): string {
-  return `${now.getFullYear()}-${pad2(now.getMonth() + 1)}`
-}
-
-/** Moves a `YYYY-MM` month by `delta` months (negative goes back). */
-export function shiftMonth(month: string, delta: number): string {
-  const { year, monthIndex } = parseMonth(month)
-  const total = year * MONTHS_PER_YEAR + monthIndex + delta
-  const newYear = Math.floor(total / MONTHS_PER_YEAR)
-  const newMonthIndex = total - newYear * MONTHS_PER_YEAR
-  return `${newYear}-${pad2(newMonthIndex + 1)}`
-}
+export { currentMonth, formatMonthLabel, shiftMonth } from '../../lib/months'
 
 /** Expenses whose `YYYY-MM-DD` date falls in the given month. */
 export function expensesInMonth(list: Expense[], month: string): Expense[] {
@@ -53,12 +30,4 @@ export function totalsByCategory(list: Expense[]): CategoryTotal[] {
   return [...byCategory.entries()]
     .map(([category, t]) => ({ category, label: categoryLabel(category), ...t }))
     .sort((a, b) => b.totalCents - a.totalCents || a.label.localeCompare(b.label))
-}
-
-const monthFormatter = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' })
-
-/** Human readable label, e.g. "March 2026" (locale dependent). */
-export function formatMonthLabel(month: string): string {
-  const { year, monthIndex } = parseMonth(month)
-  return monthFormatter.format(new Date(year, monthIndex, 1))
 }

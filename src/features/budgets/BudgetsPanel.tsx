@@ -1,6 +1,6 @@
 import { useId, useState, type CSSProperties, type FormEvent } from 'react'
 import type { Expense } from '../../types'
-import { DEFAULT_CATEGORIES, categoryColor, categoryLabel } from '../../lib/categories'
+import { categoryColor, categoryLabel, getCategories, useCategories } from '../../lib/categories'
 import { centsToInput, parseAmountToCents } from '../../lib/money'
 import { budgetStatus, formatBudgetMoney, loadBudgets, monthOf, saveBudgets, type BudgetStatus, type Budgets } from './budgets'
 import './budgets.css'
@@ -10,21 +10,23 @@ export interface BudgetsPanelProps {
   expenses: Expense[]
   /** Injectable clock for tests; defaults to the real current date. */
   now?: Date
+  /** Month to show (`YYYY-MM`), e.g. the one picked in the summary. Defaults to the month of `now`. */
+  month?: string
 }
 
 type Drafts = Record<string, string>
 
 const toDrafts = (budgets: Budgets): Drafts =>
-  Object.fromEntries(DEFAULT_CATEGORIES.map((c) => [c.id, c.id in budgets ? centsToInput(budgets[c.id]) : '']))
+  Object.fromEntries(getCategories().map((c) => [c.id, c.id in budgets ? centsToInput(budgets[c.id]) : '']))
 
 const colorStyle = (category: string) => ({ '--dot': categoryColor(category) }) as CSSProperties
 
 /** Parses drafts into budgets; blank means "no budget". Returns labels of invalid fields instead when any. */
 function parseDrafts(drafts: Drafts, current: Budgets): { budgets: Budgets } | { invalid: string[] } {
-  // Keep budgets for categories the editor doesn't show (e.g. no longer in DEFAULT_CATEGORIES).
+  // Keep budgets for categories the editor doesn't show (e.g. deleted ones).
   const budgets: Budgets = Object.fromEntries(Object.entries(current).filter(([id]) => !(id in drafts)))
   const invalid: string[] = []
-  for (const { id, label } of DEFAULT_CATEGORIES) {
+  for (const { id, label } of getCategories()) {
     const text = drafts[id]?.trim() ?? ''
     if (text === '') continue
     const cents = parseAmountToCents(text)
@@ -59,14 +61,15 @@ function BudgetLine({ status }: { status: BudgetStatus }) {
   )
 }
 
-export function BudgetsPanel({ expenses, now }: BudgetsPanelProps) {
+export function BudgetsPanel({ expenses, now, month }: BudgetsPanelProps) {
   const [budgets, setBudgets] = useState<Budgets>(() => loadBudgets())
   const [editing, setEditing] = useState(false)
   const [drafts, setDrafts] = useState<Drafts>({})
   const [error, setError] = useState<string | null>(null)
   const editorId = useId()
 
-  const statuses = budgetStatus(expenses, budgets, monthOf(now ?? new Date()))
+  const categories = useCategories()
+  const statuses = budgetStatus(expenses, budgets, month ?? monthOf(now ?? new Date()))
 
   function toggleEditor() {
     if (!editing) setDrafts(toDrafts(budgets))
@@ -110,7 +113,7 @@ export function BudgetsPanel({ expenses, now }: BudgetsPanelProps) {
         <form id={editorId} className="budgets-editor" aria-label="Monthly budgets" onSubmit={handleSave} noValidate>
           <p className="muted small">Monthly limit per category. Leave blank for no budget.</p>
           <div className="budgets-grid">
-            {DEFAULT_CATEGORIES.map(({ id, label }) => (
+            {categories.map(({ id, label }) => (
               <div key={id} className="field" style={colorStyle(id)}>
                 <label htmlFor={`${editorId}-${id}`} className="budget-input-label">
                   <span className="cat-dot" aria-hidden="true" />

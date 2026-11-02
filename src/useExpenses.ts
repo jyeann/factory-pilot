@@ -29,5 +29,14 @@ export function useExpenses() {
   /** Adds expenses that already have ids (e.g. recurring occurrences); ids already present are skipped. */
   const addMany = useCallback((incoming: Expense[]) => setExpenses((list) => mergeExpenses(list, incoming)), [])
 
-  return { expenses, add, remove, restore, update, addMany }
+  /** Moves every expense in `fromId` to `toId` (used before deleting a category). */
+  const reassignCategory = useCallback(
+    (fromId: string, toId: string) =>
+      setExpenses((list) =>
+        list.some((e) => e.category === fromId) ? list.map((e) => (e.category === fromId ? { ...e, category: toId } : e)) : list,
+      ),
+    [],
+  )
+
+  return { expenses, add, remove, restore, update, addMany, reassignCategory }
 }

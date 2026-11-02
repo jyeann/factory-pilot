@@ -1,5 +1,5 @@
 import type { Expense } from '../../types'
-import { DEFAULT_CATEGORIES } from '../../lib/categories'
+import { getCategories } from '../../lib/categories'
 import { toIsoDate } from '../../lib/dates'
 import { loadJson, saveJson } from '../../lib/storage'
 
@@ -49,11 +49,11 @@ function stateFor(spentCents: number, limitCents: number): BudgetState {
   return spentCents * NEAR_DENOMINATOR >= limitCents * NEAR_NUMERATOR ? 'near' : 'ok'
 }
 
-/** Category ids with a budget: default categories in their usual order, then any others. */
+/** Active categories that have a budget, in the store's order. Deleted or unknown ids are ignored. */
 function budgetedCategories(budgets: Budgets): string[] {
-  const known = DEFAULT_CATEGORIES.map((c) => c.id).filter((id) => id in budgets)
-  const others = Object.keys(budgets).filter((id) => !known.includes(id))
-  return [...known, ...others]
+  return getCategories()
+    .map((c) => c.id)
+    .filter((id) => id in budgets)
 }
 
 /** Spending against each budgeted category for `month` (`YYYY-MM`). */

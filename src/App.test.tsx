@@ -40,7 +40,7 @@ describe('App', () => {
 
     await user.click(screen.getByRole('button', { name: 'Delete Tea' }))
     expect(screen.queryByText('Tea')).not.toBeInTheDocument()
-    expect(screen.getByRole('status')).toHaveTextContent('Expense deleted.')
+    expect(screen.getByRole('status', { name: 'Notifications' })).toHaveTextContent('Expense deleted.')
 
     await user.click(screen.getByRole('button', { name: 'Undo' }))
     expect(screen.getByText('Tea')).toBeInTheDocument()

@@ -1,7 +1,12 @@
 import '@testing-library/jest-dom/vitest'
+import { resetCategoriesForTests } from './lib/categories'
 
-// Every test starts with empty storage, so features never see each other's data.
-afterEach(() => localStorage.clear())
+// Every test starts with empty storage and a fresh category store, so features never
+// see each other's data.
+afterEach(() => {
+  localStorage.clear()
+  resetCategoriesForTests()
+})
 
 // jsdom has no HTMLDialogElement.showModal/close; minimal polyfill for <dialog> tests.
 if (typeof HTMLDialogElement !== 'undefined') {
