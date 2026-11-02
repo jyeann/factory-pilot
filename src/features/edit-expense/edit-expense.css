@@ -1,0 +1,25 @@
+/* Edit expense dialog: the shared form is the sheet; the dialog is only a frame. */
+.edit-expense-dialog {
+  width: min(560px, calc(100% - 32px));
+  max-width: none;
+  max-height: calc(100% - 32px);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sheet);
+  background: transparent;
+  color: var(--text);
+  overflow: auto;
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--text) 25%, transparent);
+}
+.edit-expense-dialog::backdrop {
+  background: color-mix(in srgb, var(--text) 40%, transparent);
+}
+/* The dialog is narrower than the page: description gets its own row, the rest wraps. */
+.edit-expense-dialog .form-grid { grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); }
+.edit-expense-dialog .form-grid .field-description { grid-column: 1 / -1; order: -1; }
+.edit-expense-dialog .form-grid .form-actions { grid-column: 1 / -1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .edit-expense-dialog[open] { animation: edit-expense-in 160ms ease-out; }
+  @keyframes edit-expense-in { from { transform: translateY(12px); opacity: 0; } }
+}
