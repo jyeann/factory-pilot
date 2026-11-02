@@ -10,6 +10,10 @@ interface Props {
   expenses: Expense[]
   /** Injectable clock for tests; defaults to the real current date. */
   now?: Date
+  /** Controlled month (`YYYY-MM`). Omit to let the component keep its own. */
+  month?: string
+  /** Called with the new month when the user moves to the previous/next month. */
+  onMonthChange?: (month: string) => void
 }
 
 /** Share of the month as a whole percent; tiny non-zero shares show as "<1%". */
@@ -20,9 +24,15 @@ function formatShare(ratio: number): string {
 
 const dotStyle = (category: string) => ({ '--dot': categoryColor(category) }) as CSSProperties
 
-export function MonthlySummary({ expenses, now }: Props) {
+export function MonthlySummary({ expenses, now, month: controlledMonth, onMonthChange }: Props) {
   const thisMonth = currentMonth(now)
-  const [month, setMonth] = useState(thisMonth)
+  const [ownMonth, setOwnMonth] = useState(thisMonth)
+  const month = controlledMonth ?? ownMonth
+  const setMonth = (update: (m: string) => string) => {
+    const next = update(month)
+    if (controlledMonth === undefined) setOwnMonth(next)
+    onMonthChange?.(next)
+  }
 
   const inMonth = expensesInMonth(expenses, month)
   const breakdown = totalsByCategory(inMonth)

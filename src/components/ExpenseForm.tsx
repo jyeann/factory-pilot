@@ -1,6 +1,6 @@
 import { useId, useState, type FormEvent } from 'react'
 import type { NewExpense } from '../types'
-import { DEFAULT_CATEGORIES } from '../lib/categories'
+import { categoryLabel, useCategories } from '../lib/categories'
 import { centsToInput, parseAmountToCents } from '../lib/money'
 import { toIsoDate } from '../lib/dates'
 
@@ -27,7 +27,13 @@ export function ExpenseForm({
 }: Props) {
   const [amount, setAmount] = useState(() => (initial ? centsToInput(initial.amountCents) : ''))
   const [description, setDescription] = useState(initial?.description ?? '')
-  const [category, setCategory] = useState(initial?.category ?? DEFAULT_CATEGORIES[0].id)
+  const categories = useCategories()
+  const [chosenCategory, setCategory] = useState(initial?.category ?? categories[0].id)
+  // A deleted category stays selectable only for the expense that already had it (edit);
+  // otherwise fall back to the first active category.
+  const isActive = categories.some((c) => c.id === chosenCategory)
+  const keepInactive = !isActive && initial?.category === chosenCategory
+  const category = isActive || keepInactive ? chosenCategory : categories[0].id
   const [date, setDate] = useState(() => initial?.date ?? toIsoDate(new Date()))
   const [error, setError] = useState<string | null>(null)
   const amountId = useId()
@@ -69,11 +75,12 @@ export function ExpenseForm({
         <label>
           Category
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {DEFAULT_CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.label}
               </option>
             ))}
+            {keepInactive && <option value={category}>{categoryLabel(category)} (deleted)</option>}
           </select>
         </label>
         <label>

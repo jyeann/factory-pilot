@@ -20,6 +20,9 @@
   --cat-housing: #8a5cd1;
   --cat-entertainment: #d93f78;
   --cat-other: #9b8478;
+  /* Palette for custom categories (CATEGORY_PALETTE in lib/categories.ts). */
+  --cat-p1: #2f9e6b; --cat-p2: #3576d4; --cat-p3: #8a5cd1; --cat-p4: #d93f78; --cat-p5: #c7731a;
+  --cat-p6: #138a8a; --cat-p7: #5b6bd6; --cat-p8: #6f8f1f; --cat-p9: #b8409a; --cat-p10: #7a675d;
 
   --font-display: 'Bricolage Grotesque', 'Figtree', system-ui, sans-serif;
   --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -48,6 +51,8 @@
   --danger: #ff8fa3;
   --focus: #c9a6ff;
   --cat-other: #a8968c;
+  --cat-p1: #4cc48d; --cat-p2: #5b9cf0; --cat-p3: #a985ea; --cat-p4: #f06b9b; --cat-p5: #e8973f;
+  --cat-p6: #3cb8b8; --cat-p7: #8492f0; --cat-p8: #9cbd45; --cat-p9: #e06cc0; --cat-p10: #b0a097;
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
@@ -65,6 +70,8 @@
     --danger: #ff8fa3;
     --focus: #c9a6ff;
     --cat-other: #a8968c;
+    --cat-p1: #4cc48d; --cat-p2: #5b9cf0; --cat-p3: #a985ea; --cat-p4: #f06b9b; --cat-p5: #e8973f;
+    --cat-p6: #3cb8b8; --cat-p7: #8492f0; --cat-p8: #9cbd45; --cat-p9: #e06cc0; --cat-p10: #b0a097;
     color-scheme: dark;
   }
 }
@@ -134,7 +141,8 @@ button.ghost:hover:not(:disabled) { color: var(--text); }
 /* Toolbar: filter + export */
 .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .toolbar .search-filter { flex: 1 1 320px; }
-.toolbar .csv-export { margin-left: auto; }
+.toolbar-actions { display: flex; gap: 8px; margin-left: auto; }
+.toolbar:empty, .toolbar-actions:empty { display: none; }
 
 /* Expense list, grouped by day */
 .expenses { display: grid; gap: 4px; }

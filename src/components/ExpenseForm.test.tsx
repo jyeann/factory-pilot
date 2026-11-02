@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExpenseForm } from './ExpenseForm'
+import { addCategory, removeCategory } from '../lib/categories'
 
 const initial = { amountCents: 1250, description: 'Pizza', category: 'entertainment', date: '2026-10-30' }
 
@@ -43,5 +44,13 @@ describe('ExpenseForm', () => {
     await user.click(screen.getByRole('button', { name: 'Add' }))
     expect(screen.getByLabelText('Amount')).toHaveValue('')
     expect(screen.getByLabelText('Description')).toHaveValue('')
+  })
+
+  it('keeps a deleted category when editing an expense that has it', () => {
+    addCategory('Gym', 'p1')
+    removeCategory('gym')
+    render(<ExpenseForm onAdd={vi.fn()} initial={{ ...initial, category: 'gym' }} />)
+    expect(screen.getByLabelText('Category')).toHaveValue('gym')
+    expect(screen.getByRole('option', { name: 'Gym (deleted)' })).toBeInTheDocument()
   })
 })

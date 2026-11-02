@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
-import { DEFAULT_CATEGORIES } from '../../lib/categories'
+import { useCategories } from '../../lib/categories'
 import { addMonthsClamped } from '../../lib/dates'
 import { parseAmountToCents } from '../../lib/money'
 import { FREQUENCIES, isIsoDate, type Frequency, type NewRecurringRule } from './recurring'
@@ -19,7 +19,9 @@ interface Props {
 export function AddRuleForm({ id, defaultStartDate, onAdd, onCancel }: Props) {
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState(DEFAULT_CATEGORIES[0].id)
+  const categories = useCategories()
+  const [chosenCategory, setCategory] = useState(categories[0].id)
+  const category = categories.some((c) => c.id === chosenCategory) ? chosenCategory : categories[0].id
   const [frequency, setFrequency] = useState<Frequency>('monthly')
   const [startDate, setStartDate] = useState(defaultStartDate)
   const [error, setError] = useState<string | null>(null)
@@ -84,7 +86,7 @@ export function AddRuleForm({ id, defaultStartDate, onAdd, onCancel }: Props) {
         <label>
           Rule category
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {DEFAULT_CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.label}
               </option>

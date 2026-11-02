@@ -1,4 +1,4 @@
-import { DEFAULT_CATEGORIES } from '../../lib/categories'
+import { useCategories } from '../../lib/categories'
 import { ALL_CATEGORIES, EMPTY_FILTER, isFilterActive, type ExpenseFilter } from './filterExpenses'
 import './search-filter.css'
 
@@ -8,6 +8,7 @@ interface Props {
 }
 
 export function SearchFilter({ filter, onChange }: Props) {
+  const categories = useCategories()
   return (
     <section className="search-filter" role="search" aria-label="Filter expenses">
       <label>
@@ -23,7 +24,7 @@ export function SearchFilter({ filter, onChange }: Props) {
         <span className="visually-hidden">Category filter</span>
         <select value={filter.category} onChange={(e) => onChange({ ...filter, category: e.target.value })}>
           <option value={ALL_CATEGORIES}>All categories</option>
-          {DEFAULT_CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.label}
             </option>

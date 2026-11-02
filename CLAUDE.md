@@ -43,3 +43,19 @@ each on ONE feature from `FACTORY.md`, each opening its own PR.
   `addMonthsClamped`). Never `new Date('YYYY-MM-DD')`. Money: `parseAmountToCents`,
   `centsToInput`, `formatCents`. Storage: `loadJson` / `saveJson` with your own key.
 - `src/test-setup.ts` already clears localStorage after each test and polyfills `<dialog>`.
+
+## Round 3 (trends, CSV import, categories) — read `plans/round-3-trends-import-categories.md`
+- Same rule as round 2: change only files in your own `src/features/<name>/` folder; the
+  stub props (`TrendsPanel`, `ImportCsvButton`, `CategoriesPanel`) are the contract.
+- **Categories are dynamic now.** Read them with `useCategories()` (components) or
+  `getCategories()` / `categoryLabel()` / `categoryColor()` (plain code). Never use
+  `DEFAULT_CATEGORIES` for pickers or display. Store functions: `addCategory`,
+  `renameCategory`, `recolorCategory`, `removeCategory` (archives), `validateCategoryLabel`,
+  `CATEGORY_PALETTE` (theme-aware `--cat-p1…p10`).
+- Months: `src/lib/months.ts` (`monthRange`, `shiftMonth`, `formatShortMonth`, …).
+  Today: `useToday()` in App; features get `today` / `now` via props.
+- Extra reserved names: "Category", "Date", "Export CSV". App's toast region is
+  `role="status"` named "Notifications"; don't add other `role="status"` or `role="alert"`
+  elements that render by default.
+- In App-level tests scope queries with `within(...)` (category labels appear in many places).
+- CI runs lint, tests and build on every PR; it must be green.
