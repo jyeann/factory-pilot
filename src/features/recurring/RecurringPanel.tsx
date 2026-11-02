@@ -69,7 +69,10 @@ export function RecurringPanel({ onGenerate, now }: RecurringPanelProps) {
                 className="ghost icon-btn delete-btn"
                 aria-label={`Delete rule ${rule.description}`}
                 title="Delete rule (expenses already added stay)"
-                onClick={() => deleteRule(rule.id)}
+                onClick={() => {
+                  deleteRule(rule.id)
+                  toggleRef.current?.focus()
+                }}
               >
                 <span aria-hidden="true">×</span>
               </button>

@@ -1,7 +1,11 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { DEFAULT_CATEGORIES } from '../../lib/categories'
+import { addMonthsClamped } from '../../lib/dates'
 import { parseAmountToCents } from '../../lib/money'
 import { FREQUENCIES, isIsoDate, type Frequency, type NewRecurringRule } from './recurring'
+
+/** How far back a new rule may start (and so how much it backfills). */
+const MAX_BACKFILL_YEARS = 10
 
 interface Props {
   id?: string
@@ -21,10 +25,19 @@ export function AddRuleForm({ id, defaultStartDate, onAdd, onCancel }: Props) {
   const [error, setError] = useState<string | null>(null)
   const firstField = useRef<HTMLInputElement>(null)
   const amountId = useId()
+  const errorId = useId()
 
   useEffect(() => {
     firstField.current?.focus()
   }, [])
+
+  /** Earliest allowed start, so a typo'd year can't backfill thousands of expenses. */
+  const minStartDate = addMonthsClamped(defaultStartDate, -12 * MAX_BACKFILL_YEARS)
+
+  function change(setter: (value: string) => void, value: string) {
+    setter(value)
+    setError(null)
+  }
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -41,21 +54,31 @@ export function AddRuleForm({ id, defaultStartDate, onAdd, onCancel }: Props) {
       setError('Pick a start date.')
       return
     }
+    if (startDate < minStartDate) {
+      setError(`Pick a start date within the last ${MAX_BACKFILL_YEARS} years.`)
+      return
+    }
     onAdd({ description: description.trim(), amountCents, category, frequency, startDate })
   }
 
   return (
-    <form id={id} className="recurring-form" aria-label="New repeating expense" onSubmit={handleSubmit} noValidate>
+    <form id={id} className="recurring-form" aria-label="New repeating expense" onSubmit={handleSubmit}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onCancel()
+      }}
+      aria-describedby={error ? errorId : undefined}
+      noValidate
+    >
       <div className="recurring-form-grid">
         <label className="rf-description">
           Rule description
-          <input ref={firstField} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Rent" />
+          <input ref={firstField} value={description} onChange={(e) => change(setDescription, e.target.value)} placeholder="Rent" />
         </label>
         <div className="field rf-amount">
           <label htmlFor={amountId}>Rule amount</label>
           <span className="money-input">
             <span aria-hidden="true">$</span>
-            <input id={amountId} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+            <input id={amountId} inputMode="decimal" value={amount} onChange={(e) => change(setAmount, e.target.value)} placeholder="0.00" />
           </span>
         </div>
         <label>
@@ -80,11 +103,11 @@ export function AddRuleForm({ id, defaultStartDate, onAdd, onCancel }: Props) {
         </label>
         <label>
           Starts on
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          <input type="date" min={minStartDate} value={startDate} onChange={(e) => change(setStartDate, e.target.value)} />
         </label>
       </div>
       {error && (
-        <p role="alert" className="error">
+        <p id={errorId} role="alert" className="error">
           {error}
         </p>
       )}

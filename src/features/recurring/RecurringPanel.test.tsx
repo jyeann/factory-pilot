@@ -180,4 +180,34 @@ describe('RecurringPanel', () => {
       expect(screen.queryByRole('button', { name })).not.toBeInTheDocument()
     }
   })
+
+  it('Escape closes the form', async () => {
+    const user = userEvent.setup()
+    render(<RecurringPanel onGenerate={vi.fn()} now={now} />)
+    await user.click(screen.getByRole('button', { name: 'New rule' }))
+    await user.keyboard('{Escape}')
+    expect(screen.queryByLabelText('Rule description')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'New rule' })).toHaveFocus()
+  })
+
+  it('moves focus to the toggle after deleting a rule', async () => {
+    saveJson(RECURRING_STORAGE_KEY, [storedRule({ generatedThrough: '2026-11-01' })])
+    const user = userEvent.setup()
+    render(<RecurringPanel onGenerate={vi.fn()} now={now} />)
+    await user.click(screen.getByRole('button', { name: 'Delete rule Rent' }))
+    expect(screen.getByRole('button', { name: 'New rule' })).toHaveFocus()
+  })
+
+  it('rejects a start date more than 10 years back and clears the error on edit', async () => {
+    const user = userEvent.setup()
+    const onGenerate = vi.fn()
+    render(<RecurringPanel onGenerate={onGenerate} now={now} />)
+    await openAndFill(user, { description: 'Old', amount: '5', start: '1999-01-01' })
+    await user.click(screen.getByRole('button', { name: 'Add rule' }))
+    expect(screen.getByRole('alert')).toHaveTextContent(/10 years/)
+    expect(onGenerate).not.toHaveBeenCalled()
+
+    await user.type(screen.getByLabelText('Rule description'), '!')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
 })

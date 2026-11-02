@@ -9,7 +9,7 @@ const loadRules = () => loadJson(RECURRING_STORAGE_KEY, parseRules, [])
  * Rules state, persisted to localStorage, plus generation of due occurrences.
  * Generation runs in an effect on mount and whenever rules or `today` change. It is
  * idempotent (StrictMode runs effects twice): it computes from the current rules,
- * deterministic ids dedupe repeats in `onGenerate`, and the advanced rules are saved.
+ * deterministic ids dedupe repeats in `onGenerate`, and the advanced rules are saved by the persist effect.
  */
 export function useRecurringRules(today: string, onGenerate: (expenses: Expense[]) => void) {
   const [rules, setRules] = useState<RecurringRule[]>(loadRules)
@@ -18,10 +18,10 @@ export function useRecurringRules(today: string, onGenerate: (expenses: Expense[
     const result = generateDue(rules, today)
     if (!result.changed) return
     onGenerate(result.expenses)
-    saveJson(RECURRING_STORAGE_KEY, result.rules)
     setRules(result.rules)
   }, [rules, today, onGenerate])
 
+  // Single writer: the advanced rules from generation are saved here on the next commit.
   useEffect(() => {
     saveJson(RECURRING_STORAGE_KEY, rules)
   }, [rules])
