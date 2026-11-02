@@ -1,0 +1,13 @@
+.search-filter {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+.search-filter-clear { white-space: nowrap; }
+.search-filter-clear:hover:not(:disabled) { color: var(--accent); }
+.search-filter-clear:disabled { opacity: 0.5; cursor: default; }
+
+@media (max-width: 480px) {
+  .search-filter { grid-template-columns: 1fr; }
+}

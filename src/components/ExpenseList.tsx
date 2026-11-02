@@ -6,14 +6,16 @@ import { sortByDateDesc, totalCents } from '../lib/expenses'
 interface Props {
   expenses: Expense[]
   onRemove: (id: string) => void
+  /** Shown instead of the default empty-state text when the list is empty. */
+  emptyMessage?: string
 }
 
-export function ExpenseList({ expenses, onRemove }: Props) {
+export function ExpenseList({ expenses, onRemove, emptyMessage = 'No expenses yet. Add your first one above.' }: Props) {
   if (expenses.length === 0) {
     return (
       <section className="card">
         <h2>Expenses</h2>
-        <p className="muted">No expenses yet. Add your first one above.</p>
+        <p className="muted">{emptyMessage}</p>
       </section>
     )
   }
