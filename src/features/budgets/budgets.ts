@@ -19,8 +19,9 @@ export interface BudgetStatus {
 
 export const BUDGETS_STORAGE_KEY = 'factory-pilot.budgets.v1'
 
-/** Share of the budget at which a category counts as "near" its limit. */
-export const NEAR_THRESHOLD = 0.8
+/** A category counts as "near" its limit from 80% (4/5) of the budget, compared in integers. */
+const NEAR_NUMERATOR = 4
+const NEAR_DENOMINATOR = 5
 
 const isPositiveInteger = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v > 0
 
@@ -45,7 +46,7 @@ export function monthOf(now: Date): string {
 
 function stateFor(spentCents: number, limitCents: number): BudgetState {
   if (spentCents > limitCents) return 'over'
-  return spentCents >= limitCents * NEAR_THRESHOLD ? 'near' : 'ok'
+  return spentCents * NEAR_DENOMINATOR >= limitCents * NEAR_NUMERATOR ? 'near' : 'ok'
 }
 
 /** Category ids with a budget: default categories in their usual order, then any others. */

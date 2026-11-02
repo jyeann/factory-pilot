@@ -60,6 +60,16 @@ describe('BudgetsPanel', () => {
     expect(screen.queryByText(/of \$12\.50/)).not.toBeInTheDocument()
   })
 
+  it('keeps budgets for categories the editor does not show', async () => {
+    localStorage.setItem(BUDGETS_STORAGE_KEY, JSON.stringify({ pets: 3000 }))
+    const user = userEvent.setup()
+    render(<BudgetsPanel expenses={[]} now={NOW} />)
+    await user.click(screen.getByRole('button', { name: 'Set budgets' }))
+    await user.type(screen.getByLabelText('Budget for Food'), '10')
+    await user.click(screen.getByRole('button', { name: 'Save budgets' }))
+    expect(JSON.parse(localStorage.getItem(BUDGETS_STORAGE_KEY) ?? '')).toEqual({ pets: 3000, food: 1000 })
+  })
+
   it('rejects invalid amounts without saving', async () => {
     const user = userEvent.setup()
     render(<BudgetsPanel expenses={[]} now={NOW} />)

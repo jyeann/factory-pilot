@@ -20,8 +20,9 @@ const toDrafts = (budgets: Budgets): Drafts =>
 const colorStyle = (category: string) => ({ '--dot': categoryColor(category) }) as CSSProperties
 
 /** Parses drafts into budgets; blank means "no budget". Returns labels of invalid fields instead when any. */
-function parseDrafts(drafts: Drafts): { budgets: Budgets } | { invalid: string[] } {
-  const budgets: Budgets = {}
+function parseDrafts(drafts: Drafts, current: Budgets): { budgets: Budgets } | { invalid: string[] } {
+  // Keep budgets for categories the editor doesn't show (e.g. no longer in DEFAULT_CATEGORIES).
+  const budgets: Budgets = Object.fromEntries(Object.entries(current).filter(([id]) => !(id in drafts)))
   const invalid: string[] = []
   for (const { id, label } of DEFAULT_CATEGORIES) {
     const text = drafts[id]?.trim() ?? ''
@@ -75,7 +76,7 @@ export function BudgetsPanel({ expenses, now }: BudgetsPanelProps) {
 
   function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const result = parseDrafts(drafts)
+    const result = parseDrafts(drafts, budgets)
     if ('invalid' in result) {
       setError(`Enter a positive amount (or leave blank) for ${result.invalid.join(', ')}.`)
       return
@@ -90,7 +91,7 @@ export function BudgetsPanel({ expenses, now }: BudgetsPanelProps) {
     <section className="budgets" aria-labelledby={`${editorId}-title`}>
       <div className="budgets-header">
         <h2 id={`${editorId}-title`}>Budgets</h2>
-        <button type="button" className="ghost" aria-expanded={editing} aria-controls={editorId} onClick={toggleEditor}>
+        <button type="button" className="ghost" aria-expanded={editing} aria-controls={editing ? editorId : undefined} onClick={toggleEditor}>
           Set budgets
         </button>
       </div>
