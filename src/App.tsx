@@ -2,6 +2,7 @@ import { ExpenseForm } from './components/ExpenseForm'
 import { ExpenseList } from './components/ExpenseList'
 import { useExpenses } from './useExpenses'
 import { SearchFilter, useExpenseFilter } from './features/search-filter'
+import { ExportCsvButton } from './features/csv-export/ExportCsvButton'
 
 export default function App() {
   const { expenses, add, remove } = useExpenses()
@@ -21,6 +22,7 @@ export default function App() {
         emptyMessage={filterActive && expenses.length > 0 ? 'No matches' : undefined}
       />
       {/* FEATURE SLOT: export / tools go here */}
+      <ExportCsvButton expenses={expenses} />
     </main>
   )
 }
