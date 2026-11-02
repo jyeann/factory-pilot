@@ -1,6 +1,7 @@
 import { ExpenseForm } from './components/ExpenseForm'
 import { ExpenseList } from './components/ExpenseList'
 import { useExpenses } from './useExpenses'
+import { ExportCsvButton } from './features/csv-export/ExportCsvButton'
 
 export default function App() {
   const { expenses, add, remove } = useExpenses()
@@ -14,6 +15,7 @@ export default function App() {
       {/* FEATURE SLOT: summaries / charts go here */}
       <ExpenseList expenses={expenses} onRemove={remove} />
       {/* FEATURE SLOT: export / tools go here */}
+      <ExportCsvButton expenses={expenses} />
     </main>
   )
 }
