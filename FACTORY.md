@@ -33,3 +33,27 @@ Add a light/dark theme toggle in the header.
 - Define dark values for the existing CSS variables in `src/index.css`.
 - Toggle is a real button with an accessible name that reflects the current state.
 - Test that toggling switches the theme and persists.
+
+---
+
+# Round 2 (done): edit, budgets, recurring
+
+Plan: `plans/round-2-edit-budgets-recurring.md`. The plan was contract-first: a foundation PR
+landed every shared change plus stub components, then three agents worked in parallel.
+
+| Step | PR | Result |
+|---|---|---|
+| 0 Foundation & contracts | #6 | Orchestrator; 122 tests |
+| 1 Edit expenses | #8 | Agent, ~6 min, $1.59 |
+| 2 Category budgets | #7 | Agent, ~5 min, $1.61 |
+| 3 Recurring expenses | #9 | Agent, ~7 min, $2.48 |
+| 4 Integrate & verify | — | 198 tests; browser cross-checks passed |
+
+- **Merge conflicts: none** (round 1: all 4 PRs conflicted in `App.tsx`). Each feature PR
+  changed only files in its own folder.
+- The adversarial plan review caught 12 issues before any code was written (duplicate
+  accessible names breaking App tests, 31st-of-month drift, regenerating deleted
+  occurrences, the Escape key leaving the dialog stuck).
+- Known limitations: the budget panel always shows the current month (not the summary's
+  picked month); budget month and recurring generation don't roll over at midnight
+  while the app stays open.
