@@ -1,0 +1,56 @@
+/* CSV import: outline button in the toolbar (matches Export) and a preview dialog. */
+.import-btn {
+  background: transparent; color: var(--text); border: 1.5px solid var(--border);
+  padding: 8px 16px; white-space: nowrap;
+}
+.import-btn:hover:not(:disabled) { border-color: var(--text); }
+
+.csv-import-dialog {
+  width: min(600px, calc(100% - 32px));
+  max-width: none;
+  max-height: calc(100% - 32px);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sheet);
+  background: transparent;
+  color: var(--text);
+  overflow: auto;
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--text) 25%, transparent);
+}
+.csv-import-dialog::backdrop { background: color-mix(in srgb, var(--text) 40%, transparent); }
+
+.csv-import-sheet {
+  display: grid; gap: 14px; padding: 20px;
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sheet);
+}
+.csv-import-sheet h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+.csv-import-sheet p { margin: 0; }
+.csv-import-sheet .csv-import-file { margin-top: -10px; overflow-wrap: anywhere; }
+
+.csv-import-format { display: grid; gap: 6px; }
+
+.csv-import-counts { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.csv-import-counts li {
+  padding: 6px 14px; border-radius: 999px; background: var(--bg); border: 1.5px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.csv-import-counts li:first-child { background: var(--hero); color: var(--on-hero); border-color: transparent; }
+.csv-import-counts strong { font-family: var(--font-display); }
+
+.csv-import-table-wrap { overflow-x: auto; border: 1.5px solid var(--border); border-radius: var(--radius-control); }
+.csv-import-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.csv-import-table th, .csv-import-table td { padding: 8px 10px; text-align: left; vertical-align: top; }
+.csv-import-table th { color: var(--muted); font-weight: 600; font-size: 0.8rem; }
+.csv-import-table tbody tr { border-top: 1.5px solid var(--border); }
+.csv-import-table td:nth-child(2) { overflow-wrap: anywhere; }
+.csv-import-table .num { text-align: right; white-space: nowrap; }
+.csv-import-table tr.is-duplicate td { color: var(--muted); }
+.csv-import-tag { font-size: 0.8rem; font-style: italic; }
+
+.csv-import-problems ul { margin: 0; padding-left: 20px; color: var(--danger); font-size: 0.9rem; }
+.csv-import-done { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .csv-import-dialog[open] { animation: csv-import-in 160ms ease-out; }
+  @keyframes csv-import-in { from { transform: translateY(12px); opacity: 0; } }
+}
