@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { Expense } from '../../types'
 import { mergeExpenses } from '../../lib/expenses'
@@ -141,6 +141,39 @@ describe('ImportCsvButton', () => {
     fireEvent(dialog, new Event('cancel', { cancelable: true }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(onImport).not.toHaveBeenCalled()
+  })
+
+  it('ignores a slow earlier read once a newer file was picked', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    const input = screen.getByLabelText('CSV file to import')
+    let finishSlow: (text: string) => void = () => {}
+    const slow = csvFile('')
+    Object.defineProperty(slow, 'text', { value: () => new Promise<string>((resolve) => (finishSlow = resolve)) })
+    await user.upload(input, slow)
+    await user.upload(input, csvFile(`${HEADER}2025-01-01,Newer,Food,1\r\n`, 'newer.csv'))
+    const dialog = await screen.findByRole('dialog', { name: 'Import expenses' })
+    await act(async () => finishSlow(`${HEADER}2025-01-01,Older,Food,1\r\n`))
+    expect(within(dialog).getByText('newer.csv')).toBeInTheDocument()
+    expect(within(dialog).getByText('Newer')).toBeInTheDocument()
+  })
+
+  it('disables Import again when the date format is reset to "Choose…"', async () => {
+    const { user, upload } = setup()
+    const dialog = await upload(`${HEADER}03/04/2025,Coffee,Food,3\r\n`)
+    const select = within(dialog).getByLabelText('Date format')
+    await user.selectOptions(select, 'dmy')
+    expect(within(dialog).getByRole('button', { name: 'Import 1 expense' })).toBeEnabled()
+    await user.selectOptions(select, '')
+    expect(within(dialog).getByRole('button', { name: 'Import 0 expenses' })).toBeDisabled()
+  })
+
+  it('returns focus to the Import CSV button after closing', async () => {
+    const { user, upload } = setup()
+    await user.click(screen.getByRole('button', { name: 'Import CSV' }))
+    const dialog = await upload(`${HEADER}2025-01-01,Coffee,Food,3\r\n`)
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByRole('button', { name: 'Import CSV' })).toHaveFocus()
   })
 
   it('re-importing the same exported file adds nothing', async () => {

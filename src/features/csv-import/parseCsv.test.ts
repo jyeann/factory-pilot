@@ -33,6 +33,13 @@ describe('parseCsv', () => {
     expect(fields('"a,b","say ""hi""","line1\r\nline2"\n')).toEqual([['a,b', 'say "hi"', 'line1\r\nline2']])
   })
 
+  it('treats a quote inside an unquoted field as a literal character', () => {
+    expect(fields('a,5" pipe,c\nb,"x",y\n')).toEqual([
+      ['a', '5" pipe', 'c'],
+      ['b', 'x', 'y'],
+    ])
+  })
+
   it('keeps empty fields, including trailing ones', () => {
     expect(fields('a,,c,\n')).toEqual([['a', '', 'c', '']])
     expect(fields('""\n')).toEqual([])
@@ -42,13 +49,13 @@ describe('parseCsv', () => {
     expect(fields('a\n\n\nb')).toEqual([['a'], ['b']])
   })
 
-  it('numbers records like spreadsheet rows, ignoring blank lines', () => {
+  it('numbers records, ignoring blank lines', () => {
     const result = parseCsv('h\n\nx\n"multi\nline"\ny\n')
     expect(result.ok && result.records.map((r) => r.rowNumber)).toEqual([1, 2, 3, 4])
   })
 
   it('reports an unclosed quote', () => {
-    expect(parseCsv('a\n"oops,1\n2')).toEqual({ ok: false, error: 'Row 2: a quoted value is never closed.' })
+    expect(parseCsv('a\n"oops,1\n2')).toEqual({ ok: false, code: 'unclosed-quote', error: 'Row 2: a quoted value is never closed.' })
   })
 
   it('stops once there are more records than allowed', () => {

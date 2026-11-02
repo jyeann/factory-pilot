@@ -7,6 +7,7 @@ import {
   matchCategory,
   parseImportAmount,
   parseImportDate,
+  clip,
   unescapeExportPrefix,
   type DateFormatDetection,
   type SlashDateFormat,
@@ -49,9 +50,9 @@ export function readExpenseCsv(text: string): CsvFileResult {
   // +1 for the header row.
   const parsed = parseCsv(text, MAX_IMPORT_ROWS + 1)
   if (!parsed.ok) {
-    return parsed.error.includes('more than')
+    return parsed.code === 'too-many-rows'
       ? { ok: false, error: `This file has more than ${MAX_IMPORT_ROWS.toLocaleString('en-US')} rows. Split it and import the parts.` }
-      : parsed
+      : { ok: false, error: parsed.error }
   }
   const [header, ...data] = parsed.records
   if (!header) return { ok: false, error: 'This file is empty.' }
@@ -104,7 +105,7 @@ export interface ImportPlan {
   toImport: Expense[]
   duplicateCount: number
   invalid: RowProblem[]
-  /** Valid rows whose category was unknown (they go to "Other"). */
+  /** Valid rows whose (non-blank) category was unknown (they go to "Other"). */
   unknownCategoryCount: number
   /** Distinct unknown category names, in first-seen order. */
   unknownCategories: string[]
@@ -116,7 +117,7 @@ function checkRow(row: RawRow, format: SlashDateFormat | null): RowCheck {
   const date = parseImportDate(row.date, format)
   if (date === null) {
     const shown = row.date.trim()
-    return { ok: false, message: shown ? `date '${shown}' isn't a valid date` : 'date is missing' }
+    return { ok: false, message: shown ? `date '${clip(shown)}' isn't a valid date` : 'date is missing' }
   }
   const description = row.description.trim()
   if (!description) return { ok: false, message: 'description is missing' }
@@ -156,6 +157,7 @@ export function planImport(
   const storedCounts = countBy(existing, tupleKey)
   const fileCounts = countBy(valid, tupleKey)
   const storedIds = new Set(existing.map((e) => e.id))
+  const takenIds = new Set<string>()
   const seenInFile = new Map<string, number>()
   const addedPerTuple = new Map<string, number>()
   const unknownCategories: string[] = []
@@ -167,7 +169,7 @@ export function planImport(
     const unknownName = row.category.trim()
     if (matched === null && unknownName && !unknownSeen.has(unknownName.toLocaleLowerCase())) {
       unknownSeen.add(unknownName.toLocaleLowerCase())
-      unknownCategories.push(unknownName)
+      unknownCategories.push(clip(unknownName))
     }
 
     const key = tupleKey(row)
@@ -177,13 +179,15 @@ export function planImport(
     // Multiset: only (copies in file - copies stored) of each tuple are new.
     const needed = (fileCounts.get(key) ?? 0) - (storedCounts.get(key) ?? 0)
     const added = addedPerTuple.get(key) ?? 0
-    const duplicate = storedIds.has(id) || added >= needed
+    // `takenIds` also guards against two different tuples whose 32-bit hashes collide.
+    const duplicate = storedIds.has(id) || takenIds.has(id) || added >= needed
+    takenIds.add(id)
     if (!duplicate) addedPerTuple.set(key, added + 1)
     planned.push({
       rowNumber: row.rowNumber,
       expense: { id, date: row.date, description: row.description, amountCents: row.amountCents, category: matched ?? FALLBACK_CATEGORY_ID },
       duplicate,
-      unknownCategory: matched === null,
+      unknownCategory: matched === null && unknownName !== '',
     })
   }
 

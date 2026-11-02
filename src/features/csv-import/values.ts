@@ -7,7 +7,18 @@ import { parseAmountToCents } from '../../lib/money'
 /** Our export prefixes cells starting with these characters with `'` (CSV injection guard). */
 const EXPORT_PREFIXED = /^'[=+\-@\t\r]/
 
-/** Undoes the `'` our CSV export adds before `= + - @`, tab or CR. */
+/** Longest piece of a cell we echo back in messages. */
+const MAX_ECHO = 40
+
+/** Shortens untrusted cell text before showing it in a message. */
+export function clip(value: string): string {
+  return value.length > MAX_ECHO ? `${value.slice(0, MAX_ECHO - 1)}…` : value
+}
+
+/**
+ * Undoes the `'` our CSV export adds before `= + - @`, tab or CR.
+ * (Text that really started with `'=` loses its `'`: the export format can't tell them apart.)
+ */
 export function unescapeExportPrefix(value: string): string {
   return EXPORT_PREFIXED.test(value) ? value.slice(1) : value
 }
@@ -82,7 +93,7 @@ export type AmountResult = { ok: true; cents: number } | { ok: false; problem: s
 
 /** Parses "12.50", "$12.50" or "1,234.50" to cents. Zero, negative and junk are rejected. */
 export function parseImportAmount(raw: string): AmountResult {
-  const shown = raw.trim()
+  const shown = clip(raw.trim())
   let value = shown.replace(/^\$/, '').trim()
   if (GROUPED_THOUSANDS.test(value)) value = value.replace(/,/g, '')
   const cents = parseAmountToCents(value)

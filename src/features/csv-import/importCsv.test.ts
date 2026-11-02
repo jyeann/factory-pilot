@@ -108,7 +108,8 @@ describe('planImport', () => {
       `${HEADER}2025-01-02,A,pets,1\n2025-01-02,B,HOUSING,1\n2025-01-02,C,Groceries,1\n2025-01-02,D,Gym,1\n2025-01-02,E,groceries,1\n2025-01-02,F,,1\n`,
     )
     expect(result.toImport.map((e) => e.category)).toEqual([pets.id, 'housing', 'other', 'other', 'other', 'other'])
-    expect(result.unknownCategoryCount).toBe(4)
+    // Blank categories also go to Other but aren't reported as unknown.
+    expect(result.unknownCategoryCount).toBe(3)
     expect(result.unknownCategories).toEqual(['Groceries', 'Gym'])
   })
 
@@ -153,6 +154,15 @@ describe('planImport', () => {
       const result = plan(`${HEADER}2025-01-02,Coffee,Food,3.50\n`, [edited])
       expect(result.toImport).toEqual([])
     })
+  })
+})
+
+describe('long cell values', () => {
+  it('are shortened in messages and unknown-category names', () => {
+    const long = 'x'.repeat(500)
+    const result = plan(`${HEADER}2025-01-02,A,${long},${long}\n2025-01-02,B,${long},1\n`)
+    expect(result.invalid[0].message).toBe(`amount '${'x'.repeat(39)}…' isn't a number`)
+    expect(result.unknownCategories).toEqual([`${'x'.repeat(39)}…`])
   })
 })
 

@@ -34,6 +34,8 @@ const LISTED_PROBLEMS = 10
 
 const plural = (n: number, word: string) => `${n.toLocaleString()} ${word}${n === 1 ? '' : 's'}`
 
+const toFormat = (value: string): SlashDateFormat | null => (value === 'dmy' || value === 'mdy' ? value : null)
+
 function isOutside(rect: DOMRect, x: number, y: number): boolean {
   return x < rect.left || x > rect.right || y < rect.top || y > rect.bottom
 }
@@ -125,6 +127,7 @@ interface ReadyProps {
 function ReadyBody({ session, expenses, onChange, onImport, onClose }: ReadyProps) {
   const categories = useCategories()
   const formatHintId = useId()
+  const doneId = useId()
   const needsFormat = session.askFormat && session.format === null
   const plan = useMemo(
     () => (needsFormat ? null : planImport(session.rows, session.format, categories, expenses)),
@@ -147,7 +150,7 @@ function ReadyBody({ session, expenses, onChange, onImport, onClose }: ReadyProp
             <select
               value={session.format ?? ''}
               aria-describedby={formatHintId}
-              onChange={(e) => onChange({ ...session, format: (e.target.value || null) as SlashDateFormat | null })}
+              onChange={(e) => onChange({ ...session, format: toFormat(e.target.value) })}
             >
               <option value="">Choose…</option>
               <option value="dmy">DD/MM/YYYY (day first)</option>
@@ -171,12 +174,12 @@ function ReadyBody({ session, expenses, onChange, onImport, onClose }: ReadyProp
         </div>
       ) : (
         <>
-          <p role="status" className="csv-import-done">
+          <p id={doneId} role="status" className="csv-import-done">
             Imported {plural(imported, 'expense')}
           </p>
           <div className="form-actions">
             {/* Focus moves here so keyboard users land on the next step. */}
-            <button type="button" onClick={onClose} autoFocus>
+            <button type="button" onClick={onClose} autoFocus aria-describedby={doneId}>
               Done
             </button>
           </div>
