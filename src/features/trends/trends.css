@@ -15,7 +15,7 @@
 .trend-baseline { stroke: var(--border); stroke-width: 1.5; }
 .trend-segment { stroke: var(--surface); stroke-width: 1; }
 .trend-label { font-family: var(--font-body); font-size: 11px; fill: var(--muted); }
-.trend-current .trend-label { fill: var(--text); font-weight: 700; }
+.trend-current .trend-label { fill: var(--text); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 
 .trends-legend {
   list-style: none; margin: 0; padding: 0;

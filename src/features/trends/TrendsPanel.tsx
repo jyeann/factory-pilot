@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import type { Expense } from '../../types'
 import { categoryColor, categoryLabel, useCategories } from '../../lib/categories'
 import { formatCents } from '../../lib/money'
@@ -27,9 +27,10 @@ interface ChartProps {
   totals: readonly MonthTotal[]
   categories: readonly string[]
   idPrefix: string
+  describedBy: string
 }
 
-function TrendsChart({ totals, categories, idPrefix }: ChartProps) {
+function TrendsChart({ totals, categories, idPrefix, describedBy }: ChartProps) {
   const max = Math.max(...totals.map((t) => t.totalCents), 1)
   const slot = CHART_WIDTH / totals.length
   const barWidth = slot * BAR_WIDTH_RATIO
@@ -41,7 +42,8 @@ function TrendsChart({ totals, categories, idPrefix }: ChartProps) {
       className="trends-chart"
       viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
       role="img"
-      aria-label={`Spending per month from ${first} to ${last}, stacked by category. Show numbers for the figures.`}
+      aria-label={`Spending per month from ${first} to ${last}, stacked by category`}
+      aria-describedby={describedBy}
     >
       {totals.map((t, i) => {
         const isCurrent = i === totals.length - 1
@@ -91,7 +93,7 @@ function TrendsLegend({ categories }: { categories: readonly string[] }) {
 
 function TrendsTable({ id, totals, categories }: { id: string; totals: readonly MonthTotal[]; categories: readonly string[] }) {
   return (
-    <div id={id} className="trends-table-wrap" role="region" aria-label="Spending by month" tabIndex={0}>
+    <div id={id} className="trends-table-wrap" role="region" aria-label="Monthly figures" tabIndex={0}>
       <table className="trends-table">
         <caption className="visually-hidden">Spending by month and category</caption>
         <thead>
@@ -130,12 +132,14 @@ export function TrendsPanel({ expenses, today }: TrendsPanelProps) {
   const idPrefix = `trends${baseId.replace(/[^a-zA-Z0-9_-]/g, '')}`
   const titleId = `${idPrefix}-title`
   const tableId = `${idPrefix}-table`
+  const summaryId = `${idPrefix}-summary`
 
-  // Subscribe so renames and recolours redraw the chart.
-  useCategories()
-  const totals = monthlyTotals(expenses, today)
+  // Subscribing makes renames and recolours redraw the chart.
+  const storeCategories = useCategories()
+  const totals = useMemo(() => monthlyTotals(expenses, today), [expenses, today])
   const ready = hasTrend(totals)
-  const categories = ready ? categoriesInUse(totals) : []
+  // storeCategories is a dependency so a store change re-orders the stacks.
+  const categories = useMemo(() => (ready && storeCategories ? categoriesInUse(totals) : []), [ready, totals, storeCategories])
 
   return (
     <section className="trends" aria-labelledby={titleId}>
@@ -156,8 +160,8 @@ export function TrendsPanel({ expenses, today }: TrendsPanelProps) {
 
       {ready ? (
         <>
-          <p className="trends-summary">{trendSummary(totals)}</p>
-          <TrendsChart totals={totals} categories={categories} idPrefix={idPrefix} />
+          <p id={summaryId} className="trends-summary">{trendSummary(totals)}</p>
+          <TrendsChart totals={totals} categories={categories} idPrefix={idPrefix} describedBy={summaryId} />
           <TrendsLegend categories={categories} />
           {showNumbers && <TrendsTable id={tableId} totals={totals} categories={categories} />}
         </>
