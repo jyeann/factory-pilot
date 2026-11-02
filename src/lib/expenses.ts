@@ -6,6 +6,30 @@ export function addExpense(list: Expense[], input: NewExpense, id: string = cryp
   return [...list, { ...input, id }]
 }
 
+/**
+ * Applies `patch` to the expense with `id`. Ignores any `id` in the patch, keeps fields
+ * the patch doesn't set (including `recurringId`), and skips `undefined` values.
+ */
+export function updateExpense(list: Expense[], id: string, patch: Partial<NewExpense>): Expense[] {
+  const changes = Object.fromEntries(
+    Object.entries(patch).filter(([key, value]) => key !== 'id' && key !== 'recurringId' && value !== undefined),
+  )
+  return list.map((e) => (e.id === id ? { ...e, ...changes } : e))
+}
+
+/** Appends the incoming expenses whose ids aren't already in the list (idempotent). */
+export function mergeExpenses(list: Expense[], incoming: Expense[]): Expense[] {
+  const seen = new Set(list.map((e) => e.id))
+  const added: Expense[] = []
+  for (const e of incoming) {
+    if (!seen.has(e.id)) {
+      seen.add(e.id)
+      added.push(e)
+    }
+  }
+  return added.length === 0 ? list : [...list, ...added]
+}
+
 export function removeExpense(list: Expense[], id: string): Expense[] {
   return list.filter((e) => e.id !== id)
 }

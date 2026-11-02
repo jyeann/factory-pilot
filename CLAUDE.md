@@ -30,3 +30,16 @@ each on ONE feature from `FACTORY.md`, each opening its own PR.
 6. Accessible by default: labelled inputs, buttons with names, keyboard usable.
 7. Branch name: `feature/<feature-name>`. Commit messages: conventional commits.
 8. Finish by opening a PR against `main` describing what changed and how you tested it.
+
+## Round 2 (edit, budgets, recurring) — read `plans/round-2-edit-budgets-recurring.md`
+- The foundation step already made every shared change and wired a **stub** for your
+  feature into `App.tsx`. Edit only files inside your own `src/features/<name>/` folder.
+  If your PR diff touches any other file, you have broken the plan.
+- The stub's props (`EditExpenseDialog`, `BudgetsPanel`, `RecurringPanel`) are the
+  contract. Don't change them. If a prop is missing, stop and report instead.
+- Never give your inputs or buttons the exact names "Amount", "Description", "Add",
+  "Total" or "Undo". App tests use them (e.g. use "Rule amount", "Add rule").
+- Dates: use `src/lib/dates.ts` (`parseIsoDate`, `toIsoDate`, `addDays`,
+  `addMonthsClamped`). Never `new Date('YYYY-MM-DD')`. Money: `parseAmountToCents`,
+  `centsToInput`, `formatCents`. Storage: `loadJson` / `saveJson` with your own key.
+- `src/test-setup.ts` already clears localStorage after each test and polyfills `<dialog>`.

@@ -12,6 +12,12 @@ interface Props {
   now?: Date
 }
 
+/** Share of the month as a whole percent; tiny non-zero shares show as "<1%". */
+function formatShare(ratio: number): string {
+  const pct = Math.round(ratio * 100)
+  return pct === 0 && ratio > 0 ? '<1%' : `${pct}%`
+}
+
 const dotStyle = (category: string) => ({ '--dot': categoryColor(category) }) as CSSProperties
 
 export function MonthlySummary({ expenses, now }: Props) {
@@ -74,7 +80,7 @@ export function MonthlySummary({ expenses, now }: Props) {
                 <span className="cat-dot" style={dotStyle(t.category)} aria-hidden="true" />
                 <span className="ms-cat">{t.label}</span>
                 <span className="amount">{formatCents(t.totalCents)}</span>
-                <span className="ms-share">{Math.round((t.totalCents / total) * 100)}%</span>
+                <span className="ms-share">{formatShare(t.totalCents / total)}</span>
               </li>
             ))}
           </ul>

@@ -8,11 +8,13 @@ import { groupByDay, totalCents } from '../lib/expenses'
 interface Props {
   expenses: Expense[]
   onRemove: (id: string) => void
+  /** When set, each row gets an "Edit <description>" button. */
+  onEdit?: (expense: Expense) => void
   /** Shown instead of the default empty-state text when the list is empty. */
   emptyMessage?: string
 }
 
-export function ExpenseList({ expenses, onRemove, emptyMessage = 'No expenses yet. Add your first one above.' }: Props) {
+export function ExpenseList({ expenses, onRemove, onEdit, emptyMessage = 'No expenses yet. Add your first one above.' }: Props) {
   if (expenses.length === 0) {
     return (
       <section className="expenses" aria-labelledby="expenses-heading">
@@ -45,12 +47,25 @@ export function ExpenseList({ expenses, onRemove, emptyMessage = 'No expenses ye
                   <span className="cat-dot" style={{ '--dot': categoryColor(e.category) } as CSSProperties} aria-hidden="true" />
                   <div>
                     <div className="description">{e.description}</div>
-                    <div className="muted small">{categoryLabel(e.category)}</div>
+                    <div className="muted small">
+                      {categoryLabel(e.category)}
+                      {e.recurringId && (
+                        <span className="repeats-tag" title="Repeats automatically">
+                          <span aria-hidden="true"> ↻</span>
+                          <span className="visually-hidden">, repeats</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="row-end">
                   <span className="amount">{formatCents(e.amountCents)}</span>
-                  <button className="ghost delete-btn" onClick={() => onRemove(e.id)} aria-label={`Delete ${e.description}`}>
+                  {onEdit && (
+                    <button className="ghost icon-btn" onClick={() => onEdit(e)} aria-label={`Edit ${e.description}`}>
+                      ✎
+                    </button>
+                  )}
+                  <button className="ghost icon-btn delete-btn" onClick={() => onRemove(e.id)} aria-label={`Delete ${e.description}`}>
                     ✕
                   </button>
                 </div>

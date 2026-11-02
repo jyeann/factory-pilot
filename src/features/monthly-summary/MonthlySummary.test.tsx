@@ -67,4 +67,13 @@ describe('MonthlySummary', () => {
     render(<MonthlySummary expenses={[]} now={now} />)
     expect(screen.getByText(/Nothing spent yet this month/)).toBeInTheDocument()
   })
+
+  it('shows tiny shares as <1%', () => {
+    const list: Expense[] = [
+      { id: 'x', amountCents: 120000, description: 'Rent', category: 'housing', date: '2026-11-01' },
+      { id: 'y', amountCents: 450, description: 'Coffee', category: 'food', date: '2026-11-02' },
+    ]
+    render(<MonthlySummary expenses={list} now={now} />)
+    expect(screen.getAllByRole('listitem')[1]).toHaveTextContent('<1%')
+  })
 })
