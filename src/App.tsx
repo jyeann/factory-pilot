@@ -4,6 +4,7 @@ import { useExpenses } from './useExpenses'
 import { SearchFilter, useExpenseFilter } from './features/search-filter'
 import { ExportCsvButton } from './features/csv-export/ExportCsvButton'
 import { MonthlySummary } from './features/monthly-summary/MonthlySummary'
+import { ThemeToggle } from './features/dark-mode/ThemeToggle'
 
 export default function App() {
   const { expenses, add, remove } = useExpenses()
@@ -11,8 +12,9 @@ export default function App() {
 
   return (
     <main className="app">
-      <header>
+      <header className="app-header">
         <h1>Expense Tracker</h1>
+        <ThemeToggle />
       </header>
       <ExpenseForm onAdd={add} />
       {/* FEATURE SLOT: summaries / charts go here */}

@@ -6,9 +6,36 @@
   --border: #e3e6ea;
   --accent: #2f6fed;
   --danger: #c2410c;
+  color-scheme: light;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--text);
   background: var(--bg);
+}
+
+/* Dark theme (dark-mode feature). `data-theme` on <html> is set by ThemeToggle;
+   the media query covers the first paint before JS runs, unless light is forced.
+   Keep both blocks below in sync. */
+:root[data-theme='dark'] {
+  --bg: #121418;
+  --surface: #1c1f26;
+  --text: #e6e8eb;
+  --muted: #9ca3af;
+  --border: #2e333c;
+  --accent: #3b6fe0;
+  --danger: #fb923c;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #121418;
+    --surface: #1c1f26;
+    --text: #e6e8eb;
+    --muted: #9ca3af;
+    --border: #2e333c;
+    --accent: #3b6fe0;
+    --danger: #fb923c;
+    color-scheme: dark;
+  }
 }
 
 * { box-sizing: border-box; }
