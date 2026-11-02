@@ -127,7 +127,8 @@ button.ghost:hover:not(:disabled) { color: var(--text); }
 @media (max-width: 600px) {
   .form-grid { grid-template-columns: 1fr 1fr; }
   .form-grid .field-description { grid-column: 1 / -1; order: -1; }
-  .form-grid button { grid-column: 1 / -1; }
+  .form-grid .form-actions { grid-column: 1 / -1; }
+  .form-grid .form-actions button[type='submit'] { flex: 1; }
 }
 
 /* Toolbar: filter + export */
@@ -152,7 +153,10 @@ button.ghost:hover:not(:disabled) { color: var(--text); }
 .description { font-weight: 600; overflow-wrap: anywhere; }
 .row-end { display: flex; align-items: center; gap: 4px; }
 .row-end .amount { font-weight: 600; }
-.delete-btn { font-size: 1.1rem; line-height: 1; width: 36px; height: 36px; padding: 0; border-radius: 50%; }
+.icon-btn { font-size: 1.1rem; line-height: 1; width: 36px; height: 36px; padding: 0; border-radius: 50%; }
+.icon-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 8%, transparent); }
+.repeats-tag { color: var(--text); }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .delete-btn:hover:not(:disabled) { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
 .empty-note { padding: 24px 4px; text-align: center; }
 

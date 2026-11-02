@@ -8,6 +8,8 @@ export interface Expense {
   category: string
   /** Calendar date as `YYYY-MM-DD`. */
   date: string
+  /** Set on expenses created by a recurring rule (see `features/recurring`). */
+  recurringId?: string
 }
 
-export type NewExpense = Omit<Expense, 'id'>
+export type NewExpense = Omit<Expense, 'id' | 'recurringId'>

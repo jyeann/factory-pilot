@@ -1,23 +1,34 @@
 import { useId, useState, type FormEvent } from 'react'
 import type { NewExpense } from '../types'
 import { DEFAULT_CATEGORIES } from '../lib/categories'
-import { parseAmountToCents } from '../lib/money'
-
-function today(): string {
-  const d = new Date()
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-}
+import { centsToInput, parseAmountToCents } from '../lib/money'
+import { toIsoDate } from '../lib/dates'
 
 interface Props {
+  /** Called with all form fields on a valid submit (also in edit mode). */
   onAdd: (expense: NewExpense) => void
+  /** Prefilled values. Read once on mount: remount with a `key` to change them. */
+  initial?: NewExpense
+  title?: string
+  submitLabel?: string
+  /** When set, a "Cancel" button is shown that calls it. */
+  onCancel?: () => void
+  /** Clear amount and description after a successful submit. Default true. */
+  resetOnSubmit?: boolean
 }
 
-export function ExpenseForm({ onAdd }: Props) {
-  const [amount, setAmount] = useState('')
-  const [description, setDescription] = useState('')
-  const [category, setCategory] = useState(DEFAULT_CATEGORIES[0].id)
-  const [date, setDate] = useState(today)
+export function ExpenseForm({
+  onAdd,
+  initial,
+  title = 'Add an expense',
+  submitLabel = 'Add',
+  onCancel,
+  resetOnSubmit = true,
+}: Props) {
+  const [amount, setAmount] = useState(() => (initial ? centsToInput(initial.amountCents) : ''))
+  const [description, setDescription] = useState(initial?.description ?? '')
+  const [category, setCategory] = useState(initial?.category ?? DEFAULT_CATEGORIES[0].id)
+  const [date, setDate] = useState(() => initial?.date ?? toIsoDate(new Date()))
   const [error, setError] = useState<string | null>(null)
   const amountId = useId()
 
@@ -33,14 +44,16 @@ export function ExpenseForm({ onAdd }: Props) {
       return
     }
     onAdd({ amountCents, description: description.trim(), category, date })
-    setAmount('')
-    setDescription('')
+    if (resetOnSubmit) {
+      setAmount('')
+      setDescription('')
+    }
     setError(null)
   }
 
   return (
-    <form className="expense-form" onSubmit={handleSubmit} noValidate>
-      <h2>Add an expense</h2>
+    <form className="expense-form" aria-label={title} onSubmit={handleSubmit} noValidate>
+      <h2>{title}</h2>
       <div className="form-grid">
         <div className="field">
           <label htmlFor={amountId}>Amount</label>
@@ -67,7 +80,14 @@ export function ExpenseForm({ onAdd }: Props) {
           Date
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
-        <button type="submit">Add</button>
+        <div className="form-actions">
+          {onCancel && (
+            <button type="button" className="ghost" onClick={onCancel}>
+              Cancel
+            </button>
+          )}
+          <button type="submit">{submitLabel}</button>
+        </div>
       </div>
       {error && (
         <p role="alert" className="error">

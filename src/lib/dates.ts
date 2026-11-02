@@ -5,9 +5,28 @@ export function toIsoDate(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-function parseIsoDate(iso: string): Date {
+/** Parses `YYYY-MM-DD` as a LOCAL date. Never use `new Date('YYYY-MM-DD')`: it parses as UTC. */
+export function parseIsoDate(iso: string): Date {
   const [y, m, d] = iso.split('-').map(Number)
   return new Date(y, m - 1, d)
+}
+
+/** `iso` shifted by `n` days (negative goes back). */
+export function addDays(iso: string, n: number): string {
+  const d = parseIsoDate(iso)
+  return toIsoDate(new Date(d.getFullYear(), d.getMonth(), d.getDate() + n))
+}
+
+/**
+ * `startIso` plus `n` months, with the day clamped to the target month's last day
+ * (Jan 31 + 1 month = Feb 28, or Feb 29 in a leap year). Always compute from the same
+ * start date so the day doesn't drift (31 -> 28 -> 28 ...).
+ */
+export function addMonthsClamped(startIso: string, n: number): string {
+  const start = parseIsoDate(startIso)
+  const firstOfTarget = new Date(start.getFullYear(), start.getMonth() + n, 1)
+  const lastDay = new Date(firstOfTarget.getFullYear(), firstOfTarget.getMonth() + 1, 0).getDate()
+  return toIsoDate(new Date(firstOfTarget.getFullYear(), firstOfTarget.getMonth(), Math.min(start.getDate(), lastDay)))
 }
 
 const dayFormatter = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' })

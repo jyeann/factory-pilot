@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Expense, NewExpense } from './types'
-import { addExpense, removeExpense } from './lib/expenses'
+import { addExpense, mergeExpenses, removeExpense, updateExpense } from './lib/expenses'
 import { loadExpenses, saveExpenses } from './lib/storage'
 
 /** Single source of truth for expense state, persisted to localStorage. */
@@ -20,5 +20,14 @@ export function useExpenses() {
     [],
   )
 
-  return { expenses, add, remove, restore }
+  /** Changes fields of an existing expense; keeps its id and `recurringId`. */
+  const update = useCallback(
+    (id: string, patch: Partial<NewExpense>) => setExpenses((list) => updateExpense(list, id, patch)),
+    [],
+  )
+
+  /** Adds expenses that already have ids (e.g. recurring occurrences); ids already present are skipped. */
+  const addMany = useCallback((incoming: Expense[]) => setExpenses((list) => mergeExpenses(list, incoming)), [])
+
+  return { expenses, add, remove, restore, update, addMany }
 }

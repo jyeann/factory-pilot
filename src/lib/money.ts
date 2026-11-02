@@ -11,3 +11,9 @@ export function parseAmountToCents(input: string): number | null {
   const cents = Math.round(Number(trimmed) * 100)
   return cents > 0 ? cents : null
 }
+
+/** Cents as plain input text, e.g. 1250 -> "12.50". Inverse of `parseAmountToCents`. */
+export function centsToInput(cents: number): string {
+  const abs = Math.abs(Math.trunc(cents))
+  return `${cents < 0 ? '-' : ''}${Math.floor(abs / 100)}.${String(abs % 100).padStart(2, '0')}`
+}

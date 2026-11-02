@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../../App'
 
@@ -13,9 +13,10 @@ describe('MonthlySummary in App', () => {
     render(<App />)
     expect(screen.getByText(/Nothing spent yet this month/)).toBeInTheDocument()
 
-    await user.type(screen.getByLabelText('Amount'), '12.50')
-    await user.type(screen.getByLabelText('Description'), 'Pizza')
-    await user.click(screen.getByRole('button', { name: 'Add' }))
+    const form = within(screen.getByRole('form', { name: 'Add an expense' }))
+    await user.type(form.getByLabelText('Amount'), '12.50')
+    await user.type(form.getByLabelText('Description'), 'Pizza')
+    await user.click(form.getByRole('button', { name: 'Add' }))
 
     expect(statValue('Total spent')).toHaveTextContent('12.50')
     expect(statValue('Expenses')).toHaveTextContent('1')

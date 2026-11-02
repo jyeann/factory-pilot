@@ -1,6 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
+
+/** The main "Add an expense" form; scoping keeps lookups unambiguous as features add forms. */
+const addForm = () => within(screen.getByRole('form', { name: 'Add an expense' }))
 
 describe('App', () => {
   beforeEach(() => localStorage.clear())
@@ -9,9 +12,9 @@ describe('App', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.type(screen.getByLabelText('Amount'), '12.50')
-    await user.type(screen.getByLabelText('Description'), 'Pizza')
-    await user.click(screen.getByRole('button', { name: 'Add' }))
+    await user.type(addForm().getByLabelText('Amount'), '12.50')
+    await user.type(addForm().getByLabelText('Description'), 'Pizza')
+    await user.click(addForm().getByRole('button', { name: 'Add' }))
 
     expect(screen.getByText('Pizza')).toBeInTheDocument()
     expect(screen.getByLabelText('Total')).toHaveTextContent('12.50')
@@ -23,17 +26,17 @@ describe('App', () => {
   it('shows a validation error for a bad amount', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.type(screen.getByLabelText('Description'), 'Pizza')
-    await user.click(screen.getByRole('button', { name: 'Add' }))
+    await user.type(addForm().getByLabelText('Description'), 'Pizza')
+    await user.click(addForm().getByRole('button', { name: 'Add' }))
     expect(screen.getByRole('alert')).toHaveTextContent('amount')
   })
 
   it('restores a deleted expense with Undo', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.type(screen.getByLabelText('Amount'), '3')
-    await user.type(screen.getByLabelText('Description'), 'Tea')
-    await user.click(screen.getByRole('button', { name: 'Add' }))
+    await user.type(addForm().getByLabelText('Amount'), '3')
+    await user.type(addForm().getByLabelText('Description'), 'Tea')
+    await user.click(addForm().getByRole('button', { name: 'Add' }))
 
     await user.click(screen.getByRole('button', { name: 'Delete Tea' }))
     expect(screen.queryByText('Tea')).not.toBeInTheDocument()
