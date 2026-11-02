@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import {
   DARK_QUERY,
   applyTheme,
@@ -26,7 +26,8 @@ export function useTheme() {
     return () => query.removeEventListener('change', onChange)
   }, [preference])
 
-  useEffect(() => {
+  // Layout effect so a saved preference is applied before the first paint (no flash).
+  useLayoutEffect(() => {
     applyTheme(theme)
   }, [theme])
 

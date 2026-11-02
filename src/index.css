@@ -13,7 +13,8 @@
 }
 
 /* Dark theme (dark-mode feature). `data-theme` on <html> is set by ThemeToggle;
-   the media query covers the first paint before JS runs, unless light is forced. */
+   the media query covers the first paint before JS runs, unless light is forced.
+   Keep both blocks below in sync. */
 :root[data-theme='dark'] {
   --bg: #121418;
   --surface: #1c1f26;

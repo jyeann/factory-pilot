@@ -48,7 +48,13 @@ describe('theme helpers', () => {
   })
 
   it('falls back to light when matchMedia is unavailable', () => {
-    expect(getSystemTheme(undefined)).toBe('light')
+    const original = window.matchMedia
+    window.matchMedia = undefined as unknown as typeof window.matchMedia
+    try {
+      expect(getSystemTheme()).toBe('light')
+    } finally {
+      window.matchMedia = original
+    }
   })
 
   it('flips between themes', () => {
