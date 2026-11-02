@@ -18,7 +18,7 @@ describe('MonthlySummary', () => {
   it('shows the current month by default with totals and breakdown', () => {
     render(<MonthlySummary expenses={expenses} now={now} />)
 
-    const region = screen.getByRole('region', { name: 'This month' })
+    const region = screen.getByRole('region', { name: 'Monthly summary' })
     expect(within(region).getByText(/November 2026/)).toBeInTheDocument()
     expect(statValue('Total spent')).toHaveTextContent('15.00')
     expect(statValue('Expenses')).toHaveTextContent('2')
@@ -41,7 +41,7 @@ describe('MonthlySummary', () => {
 
     await user.click(screen.getByRole('button', { name: 'Next month' }))
     await user.click(screen.getByRole('button', { name: 'Next month' }))
-    expect(screen.getByText(/December 2026/)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /December 2026/ })).toBeInTheDocument()
   })
 
   it('shows an empty state for a month without expenses', async () => {
@@ -49,15 +49,22 @@ describe('MonthlySummary', () => {
     render(<MonthlySummary expenses={expenses} now={now} />)
 
     await user.click(screen.getByRole('button', { name: 'Next month' }))
-    expect(screen.getByText('No expenses in this month.')).toBeInTheDocument()
+    expect(screen.getByText('No expenses in December 2026.')).toBeInTheDocument()
     expect(screen.queryByText('Total spent')).not.toBeInTheDocument()
     expect(screen.queryByRole('list')).not.toBeInTheDocument()
   })
 
-  it('renders bars proportional to the largest category', () => {
+  it('shows each category as a share of the month total', () => {
     render(<MonthlySummary expenses={expenses} now={now} />)
-    const bars = document.querySelectorAll<HTMLElement>('.ms-bar-fill')
-    expect(bars[0].style.width).toBe('100%')
-    expect(bars[1].style.width).toBe('20%')
+    const items = screen.getAllByRole('listitem')
+    expect(items[0]).toHaveTextContent('83%')
+    expect(items[1]).toHaveTextContent('17%')
+    const parts = document.querySelectorAll<HTMLElement>('.ms-strip-part')
+    expect([...parts].map((p) => p.style.flexGrow)).toEqual(['1250', '250'])
+  })
+
+  it('invites a first expense when the current month is empty', () => {
+    render(<MonthlySummary expenses={[]} now={now} />)
+    expect(screen.getByText(/Nothing spent yet this month/)).toBeInTheDocument()
   })
 })

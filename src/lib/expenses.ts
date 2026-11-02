@@ -18,3 +18,18 @@ export function sortByDateDesc(list: Expense[]): Expense[] {
 export function totalCents(list: Expense[]): number {
   return list.reduce((sum, e) => sum + e.amountCents, 0)
 }
+
+export interface DayGroup {
+  date: string
+  expenses: Expense[]
+  totalCents: number
+}
+
+/** Groups expenses by date, newest day first; order within a day is preserved. */
+export function groupByDay(list: Expense[]): DayGroup[] {
+  const groups = new Map<string, Expense[]>()
+  for (const e of sortByDateDesc(list)) {
+    groups.set(e.date, [...(groups.get(e.date) ?? []), e])
+  }
+  return [...groups].map(([date, expenses]) => ({ date, expenses, totalCents: totalCents(expenses) }))
+}

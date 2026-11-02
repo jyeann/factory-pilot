@@ -1,5 +1,6 @@
-import { useId, useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import type { Expense } from '../../types'
+import { categoryColor } from '../../lib/categories'
 import { formatCents } from '../../lib/money'
 import { totalCents } from '../../lib/expenses'
 import { currentMonth, expensesInMonth, formatMonthLabel, shiftMonth, totalsByCategory } from './monthSummary'
@@ -11,25 +12,27 @@ interface Props {
   now?: Date
 }
 
+const dotStyle = (category: string) => ({ '--dot': categoryColor(category) }) as CSSProperties
+
 export function MonthlySummary({ expenses, now }: Props) {
-  const [month, setMonth] = useState(() => currentMonth(now))
-  const headingId = useId()
+  const thisMonth = currentMonth(now)
+  const [month, setMonth] = useState(thisMonth)
 
   const inMonth = expensesInMonth(expenses, month)
   const breakdown = totalsByCategory(inMonth)
-  const maxCents = breakdown[0]?.totalCents ?? 0
+  const total = totalCents(inMonth)
+  const monthLabel = formatMonthLabel(month)
 
   return (
-    <section className="card monthly-summary" aria-labelledby={headingId}>
+    <section className="monthly-summary" aria-label="Monthly summary">
       <div className="ms-header">
-        <h2 id={headingId}>This month</h2>
+        <h2 className="ms-month" aria-live="polite">
+          {monthLabel}
+        </h2>
         <div className="ms-picker">
           <button type="button" className="ms-nav" onClick={() => setMonth((m) => shiftMonth(m, -1))} aria-label="Previous month">
             ‹
           </button>
-          <span className="ms-month" aria-live="polite">
-            {formatMonthLabel(month)}
-          </span>
           <button type="button" className="ms-nav" onClick={() => setMonth((m) => shiftMonth(m, 1))} aria-label="Next month">
             ›
           </button>
@@ -37,36 +40,41 @@ export function MonthlySummary({ expenses, now }: Props) {
       </div>
 
       {inMonth.length === 0 ? (
-        <p className="muted">No expenses in this month.</p>
+        <p className="ms-empty">
+          {month === thisMonth
+            ? 'Nothing spent yet this month. Add your first expense below.'
+            : `No expenses in ${monthLabel}.`}
+        </p>
       ) : (
         <>
           <dl className="ms-stats">
-            <div>
-              <dt className="muted small">Total spent</dt>
-              <dd className="ms-total">
-                {formatCents(totalCents(inMonth))}
-              </dd>
+            <div className="ms-total-stat">
+              <dt>Total spent</dt>
+              <dd className="ms-total">{formatCents(total)}</dd>
             </div>
             <div>
-              <dt className="muted small">Expenses</dt>
-              <dd className="ms-count">
-                {inMonth.length}
-              </dd>
+              <dt>Expenses</dt>
+              <dd className="ms-count">{inMonth.length}</dd>
             </div>
           </dl>
 
+          <div className="ms-strip" aria-hidden="true">
+            {breakdown.map((t) => (
+              <span
+                key={t.category}
+                className="ms-strip-part"
+                style={{ ...dotStyle(t.category), flexGrow: t.totalCents }}
+              />
+            ))}
+          </div>
+
           <ul className="ms-breakdown" aria-label="Spending by category">
             {breakdown.map((t) => (
-              <li key={t.category} className="ms-row">
-                <div className="ms-row-text">
-                  <span>{t.label}</span>
-                  <span className="amount">
-                    {formatCents(t.totalCents)} <span className="muted small">({t.count})</span>
-                  </span>
-                </div>
-                <div className="ms-bar" aria-hidden="true">
-                  <div className="ms-bar-fill" style={{ width: `${(t.totalCents / maxCents) * 100}%` }} />
-                </div>
+              <li key={t.category}>
+                <span className="cat-dot" style={dotStyle(t.category)} aria-hidden="true" />
+                <span className="ms-cat">{t.label}</span>
+                <span className="amount">{formatCents(t.totalCents)}</span>
+                <span className="ms-share">{Math.round((t.totalCents / total) * 100)}%</span>
               </li>
             ))}
           </ul>

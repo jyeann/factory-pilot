@@ -23,18 +23,21 @@ export function ExportCsvButton({ expenses, download = downloadCsv, now = () => 
   }
 
   return (
-    <section className="card csv-export" aria-labelledby={headingId}>
-      <h2 id={headingId}>Export</h2>
+    <section className="csv-export" aria-labelledby={headingId}>
+      <h2 id={headingId} className="visually-hidden">
+        Export
+      </h2>
       <div className="csv-export-row">
         <button
           type="button"
+          className="export-btn"
           onClick={handleExport}
           disabled={isEmpty}
           aria-describedby={isEmpty ? hintId : undefined}
         >
           Export CSV
         </button>
-        <span id={hintId} className="muted small">
+        <span id={hintId} className="visually-hidden">
           {isEmpty ? 'Add an expense to enable export.' : `${count} expense${count === 1 ? '' : 's'} will be exported`}
         </span>
       </div>

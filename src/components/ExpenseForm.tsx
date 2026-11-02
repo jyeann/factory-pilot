@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
 import type { NewExpense } from '../types'
 import { DEFAULT_CATEGORIES } from '../lib/categories'
 import { parseAmountToCents } from '../lib/money'
@@ -19,6 +19,7 @@ export function ExpenseForm({ onAdd }: Props) {
   const [category, setCategory] = useState(DEFAULT_CATEGORIES[0].id)
   const [date, setDate] = useState(today)
   const [error, setError] = useState<string | null>(null)
+  const amountId = useId()
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -38,16 +39,19 @@ export function ExpenseForm({ onAdd }: Props) {
   }
 
   return (
-    <form className="card expense-form" onSubmit={handleSubmit} noValidate>
-      <h2>Add expense</h2>
+    <form className="expense-form" onSubmit={handleSubmit} noValidate>
+      <h2>Add an expense</h2>
       <div className="form-grid">
-        <label>
-          Amount
-          <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
-        </label>
-        <label>
+        <div className="field">
+          <label htmlFor={amountId}>Amount</label>
+          <span className="money-input">
+            <span aria-hidden="true">$</span>
+            <input id={amountId} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+          </span>
+        </div>
+        <label className="field-description">
           Description
-          <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Coffee" />
+          <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Coffee with Sam" />
         </label>
         <label>
           Category
@@ -63,13 +67,13 @@ export function ExpenseForm({ onAdd }: Props) {
           Date
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
+        <button type="submit">Add</button>
       </div>
       {error && (
         <p role="alert" className="error">
           {error}
         </p>
       )}
-      <button type="submit">Add</button>
     </form>
   )
 }

@@ -9,9 +9,9 @@ interface Props {
 
 export function SearchFilter({ filter, onChange }: Props) {
   return (
-    <section className="card search-filter" role="search" aria-label="Filter expenses">
+    <section className="search-filter" role="search" aria-label="Filter expenses">
       <label>
-        Search
+        <span className="visually-hidden">Search</span>
         <input
           type="search"
           value={filter.query}
@@ -20,9 +20,9 @@ export function SearchFilter({ filter, onChange }: Props) {
         />
       </label>
       <label>
-        Category filter
+        <span className="visually-hidden">Category filter</span>
         <select value={filter.category} onChange={(e) => onChange({ ...filter, category: e.target.value })}>
-          <option value={ALL_CATEGORIES}>All</option>
+          <option value={ALL_CATEGORIES}>All categories</option>
           {DEFAULT_CATEGORIES.map((c) => (
             <option key={c.id} value={c.id}>
               {c.label}

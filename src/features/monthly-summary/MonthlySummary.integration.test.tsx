@@ -11,7 +11,7 @@ describe('MonthlySummary in App', () => {
   it('updates the summary when an expense is added for the current month', async () => {
     const user = userEvent.setup()
     render(<App />)
-    expect(screen.getByText('No expenses in this month.')).toBeInTheDocument()
+    expect(screen.getByText(/Nothing spent yet this month/)).toBeInTheDocument()
 
     await user.type(screen.getByLabelText('Amount'), '12.50')
     await user.type(screen.getByLabelText('Description'), 'Pizza')
