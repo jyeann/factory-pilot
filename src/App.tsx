@@ -3,6 +3,7 @@ import { ExpenseList } from './components/ExpenseList'
 import { useExpenses } from './useExpenses'
 import { SearchFilter, useExpenseFilter } from './features/search-filter'
 import { ExportCsvButton } from './features/csv-export/ExportCsvButton'
+import { MonthlySummary } from './features/monthly-summary/MonthlySummary'
 
 export default function App() {
   const { expenses, add, remove } = useExpenses()
@@ -15,6 +16,7 @@ export default function App() {
       </header>
       <ExpenseForm onAdd={add} />
       {/* FEATURE SLOT: summaries / charts go here */}
+      <MonthlySummary expenses={expenses} />
       {(expenses.length > 0 || filterActive) && <SearchFilter filter={filter} onChange={setFilter} />}
       <ExpenseList
         expenses={filtered}
