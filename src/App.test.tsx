@@ -27,4 +27,20 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Add' }))
     expect(screen.getByRole('alert')).toHaveTextContent('amount')
   })
+
+  it('restores a deleted expense with Undo', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.type(screen.getByLabelText('Amount'), '3')
+    await user.type(screen.getByLabelText('Description'), 'Tea')
+    await user.click(screen.getByRole('button', { name: 'Add' }))
+
+    await user.click(screen.getByRole('button', { name: 'Delete Tea' }))
+    expect(screen.queryByText('Tea')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Expense deleted.')
+
+    await user.click(screen.getByRole('button', { name: 'Undo' }))
+    expect(screen.getByText('Tea')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeInTheDocument()
+  })
 })

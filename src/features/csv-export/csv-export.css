@@ -1,3 +1,5 @@
-.csv-export-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.csv-export button:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-.csv-export button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.export-btn {
+  background: transparent; color: var(--text); border: 1.5px solid var(--border);
+  padding: 8px 16px; white-space: nowrap;
+}
+.export-btn:hover:not(:disabled) { border-color: var(--text); }

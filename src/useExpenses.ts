@@ -14,5 +14,11 @@ export function useExpenses() {
   const add = useCallback((input: NewExpense) => setExpenses((list) => addExpense(list, input)), [])
   const remove = useCallback((id: string) => setExpenses((list) => removeExpense(list, id)), [])
 
-  return { expenses, add, remove }
+  /** Puts a previously removed expense back (used for undo). */
+  const restore = useCallback(
+    (expense: Expense) => setExpenses((list) => (list.some((e) => e.id === expense.id) ? list : [...list, expense])),
+    [],
+  )
+
+  return { expenses, add, remove, restore }
 }

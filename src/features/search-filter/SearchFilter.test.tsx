@@ -30,7 +30,7 @@ describe('search and category filter', () => {
     expect(screen.getByLabelText('Total')).toHaveTextContent('15.00')
 
     await user.type(screen.getByLabelText('Search'), 'xyz')
-    expect(screen.getByText('No matches')).toBeInTheDocument()
+    expect(screen.getByText(/^No matches/)).toBeInTheDocument()
     expect(screen.queryByText(/No expenses yet/)).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Clear filters' }))
