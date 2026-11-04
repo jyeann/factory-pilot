@@ -57,3 +57,36 @@ landed every shared change plus stub components, then three agents worked in par
 - Known limitations: the budget panel always shows the current month (not the summary's
   picked month); budget month and recurring generation don't roll over at midnight
   while the app stays open.
+
+---
+
+# Round 3 (done): trends, CSV import, custom categories (+ fix-ups, CI)
+
+Plan: `plans/round-3-trends-import-categories.md` (adversarial review: 17 issues fixed
+before coding).
+
+| Step | PR | Result |
+|---|---|---|
+| 0 Foundation: category store, fix-ups, CI | #10 | Orchestrator; 216 tests; first CI run green |
+| 1 Spending trends | #11 | Agent, CI green, $4.32 final |
+| 2 CSV import | #13 | Agent, CI green, $6.68 final |
+| 3 Custom categories | #12 | Agent, CI green, $3.80 final |
+| 4 Integrate & verify | — | 340 tests; browser cross-checks passed |
+
+- Merge conflicts: none again; each PR changed only its own folder.
+- Browser checks: a new category appears in the add form, filter, budgets, hero and
+  chart; export → import into the same data adds 0 (13 duplicates), into an empty app
+  adds 13; deleting a category moves its expenses to Other; budgets follow the picked
+  month.
+- Lesson: agents scheduled their own follow-up check-ins after their PRs were green,
+  which roughly doubled their cost (~$9 at hand-off → $14.80 final). Next time: tell
+  workers to finish once CI is green and not schedule follow-ups.
+
+## Cost across the pilot
+| | Workers | Notes |
+|---|---|---|
+| Round 1 (4 features) | $4.34 | 4 conflicts, merged by hand |
+| Round 2 (3 features) | $5.68 | 0 conflicts |
+| Round 3 (3 features) | $14.80 | 0 conflicts; includes self-scheduled follow-ups |
+| Orchestrator session | $24.24 | setup, base app, redesign, 3 foundations, reviews, merges |
+| **Total** | **≈ $49** | 10 features + redesign + CI |
